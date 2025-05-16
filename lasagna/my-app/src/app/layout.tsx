@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LASAGNA",
-  description: "Get personalized cooking assistance and recipe recommendations powered by AI",
+  description: "Come join and eat some lasagna",
   openGraph: {
     title: "LASAGNA",
-    description: "Get personalized cooking assistance and recipe recommendations powered by AI",
+    description: "Come join and eat some lasagna",
     url: "https://lasagna.vercel.app",
     siteName: "LASAGNA",
     images: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LASAGNA",
-    description: "Get personalized cooking assistance and recipe recommendations powered by AI",
+    description: "Come join and eat some lasagna",
     images: ["/lasagna.png"],
   },
 };
