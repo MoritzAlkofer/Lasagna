@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
+
 function Heading() {
   return (
     <div className="text-center space-y-2 mb-8">
