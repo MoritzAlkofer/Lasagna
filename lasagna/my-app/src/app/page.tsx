@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 function Heading() {
@@ -19,82 +20,119 @@ function Heading() {
   );
 }
 
-function SeatButton({ index, selected, onClick }: { index: number, selected: boolean, onClick: () => void }) {
+function SeatButton({ index, selected, onClick, disabled, occupiedName }: { index: number, selected: boolean, onClick: () => void, disabled?: boolean, occupiedName?: string }) {
   return (
     <button
       onClick={onClick}
-      className={`w-16 h-16 rounded-full border-2 shadow-lg flex items-center justify-center text-xl font-bold transition-all duration-200 text-black
-        ${selected ? 'bg-green-400 border-green-700 text-white' : 'bg-white border-gray-600 hover:bg-gray-200'}
+      disabled={disabled}
+      className={`w-24 h-24 rounded-full border-4 shadow-xl flex items-center justify-center text-3xl font-bold transition-all duration-200
+        ${disabled ? 'bg-green-400 border-green-700 text-white cursor-not-allowed' : selected ? 'bg-blue-400 border-blue-700 text-white' : 'bg-white border-gray-600 hover:bg-gray-200'}
       `}
+      title={occupiedName ? `Reserved by ${occupiedName}` : `Seat ${index + 1}`}
+      aria-label={occupiedName ? `Reserved by ${occupiedName}` : `Seat ${index + 1}`}
     >
       {index + 1}
     </button>
   );
 }
 
-function SixSeats() {
-  const [selected, setSelected] = useState(Array(6).fill(false));
+function SixSeats({ selected, setSelected, occupiedSeats }: { selected: number | null, setSelected: (i: number | null) => void, occupiedSeats: { seat: number, name: string }[] }) {
   const topRow = [0, 1, 2];
   const bottomRow = [3, 4, 5];
 
-  function toggleSeat(index: number) {
-    setSelected(prev =>
-      prev.map((val, i) => (i === index ? !val : val))
-    );
+  function selectSeat(index: number) {
+    if (!occupiedSeats.some(s => s.seat === index + 1)) {
+      setSelected(index === selected ? null : index);
+    }
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-8">
       {/* Top row of 3 seats */}
-      <div className="flex gap-6 mb-2">
-        {topRow.map(i => (
-          <SeatButton
-            key={i}
-            index={i}
-            selected={selected[i]}
-            onClick={() => toggleSeat(i)}
-          />
-        ))}
+      <div className="flex gap-12 mb-4">
+        {topRow.map(i => {
+          const isOccupied = occupiedSeats.some(s => s.seat === i + 1);
+          const occupiedName = occupiedSeats.find(s => s.seat === i + 1)?.name;
+          return (
+            <SeatButton
+              key={i}
+              index={i}
+              selected={selected === i}
+              onClick={() => selectSeat(i)}
+              disabled={isOccupied}
+              occupiedName={occupiedName}
+            />
+          );
+        })}
       </div>
       {/* Lasagna image */}
-      <div className="my-2">
+      <div className="my-4">
         <Image
           src="/lasagna.png"
           alt="Lasagna"
-          width={192}
-          height={128}
-          className="rounded shadow-md object-cover"
+          width={256}
+          height={160}
+          className="rounded-xl shadow-2xl object-cover"
           priority
         />
       </div>
       {/* Bottom row of 3 seats */}
-      <div className="flex gap-6 mt-2">
-        {bottomRow.map(i => (
-          <SeatButton
-            key={i}
-            index={i}
-            selected={selected[i]}
-            onClick={() => toggleSeat(i)}
-          />
-        ))}
+      <div className="flex gap-12 mt-4">
+        {bottomRow.map(i => {
+          const isOccupied = occupiedSeats.some(s => s.seat === i + 1);
+          const occupiedName = occupiedSeats.find(s => s.seat === i + 1)?.name;
+          return (
+            <SeatButton
+              key={i}
+              index={i}
+              selected={selected === i}
+              onClick={() => selectSeat(i)}
+              disabled={isOccupied}
+              occupiedName={occupiedName}
+            />
+          );
+        })}
       </div>
-      <p className="text-black mt-4">
-        {selected.some(Boolean)
-          ? `Seats reserved: ${selected.map((v, i) => v ? i + 1 : null).filter(Boolean).join(', ')}`
+      <p className="text-black mt-6 text-lg">
+        {selected !== null
+          ? `Seat selected: ${selected + 1}`
           : "Click a seat to reserve"}
       </p>
     </div>
   );
 }
 
-function NameForm() {
+function NameForm({ selectedSeat, onSuccess, refreshSeats }: { selectedSeat: number | null, onSuccess: (name: string) => void, refreshSeats: () => void }) {
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState('');
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (name.trim()) {
+    if (!name.trim()) {
+      setMessage('Please enter your name first!');
+      return;
+    }
+    if (selectedSeat === null) {
+      setMessage('Please select a seat!');
+      return;
+    }
+    setMessage('');
+    const seatNumber = selectedSeat + 1;
+    const { error } = await supabase.from('guests').insert([
+      {
+        seat: seatNumber,
+        name: name.trim(),
+      },
+    ]);
+    if (error) {
+      setMessage('Error: ' + error.message);
+    } else {
+      setMessage(`✅ ${name} saved to seat ${seatNumber}!`);
       setSubmitted(true);
+      onSuccess(name.trim());
+      setName('');
+      refreshSeats();
     }
   }
 
@@ -114,8 +152,8 @@ function NameForm() {
       >
         Submit
       </button>
-      {submitted && (
-        <p className="text-green-600 mt-2 text-black">Thank you, {name}!</p>
+      {message && (
+        <p className="text-green-600 mt-2 text-black">{message}</p>
       )}
     </form>
   );
@@ -139,26 +177,36 @@ function getRandomLasagnaJoke() {
 }
 
 export default function Page() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [occupiedSeats, setOccupiedSeats] = useState<{ seat: number, name: string }[]>([]);
   const [joke, setJoke] = useState("");
+
+  async function fetchOccupiedSeats() {
+    const { data, error } = await supabase
+      .from('guests')
+      .select('seat, name');
+    if (!error && data) {
+      setOccupiedSeats(data);
+    }
+  }
+
+  useEffect(() => {
+    fetchOccupiedSeats();
+  }, []);
 
   function handleShowJoke() {
     setJoke(getRandomLasagnaJoke());
   }
 
-  function LasagnaJoke() {
-    return (
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      <Heading />
+      <SixSeats selected={selected} setSelected={setSelected} occupiedSeats={occupiedSeats} />
+      <NameForm selectedSeat={selected} onSuccess={() => setSelected(null)} refreshSeats={fetchOccupiedSeats} />
       <div className="mt-8 p-6 bg-gray-100 rounded-lg shadow w-full max-w-md flex flex-col items-center">
         <button onClick={handleShowJoke} className="text-black cursor-pointer bg-transparent border-none p-0 font-semibold hover:underline">Tell me a lasagna joke!</button>
         {joke && <p className="mt-2 text-black">{joke}</p>}
       </div>
-    );
-  }
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-      <Heading />
-      <SixSeats />
-      <NameForm />
-      <LasagnaJoke />
     </div>
   );
 }
