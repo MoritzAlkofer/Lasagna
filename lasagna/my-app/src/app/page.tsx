@@ -27,7 +27,7 @@ function SeatButton({ index, selected, onClick, disabled, occupiedName }: { inde
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-24 h-24 rounded-full border-4 shadow-xl flex items-center justify-center text-3xl font-bold transition-all duration-200
+      className={`w-16 h-16 rounded-full border-4 shadow-xl flex items-center justify-center text-3xl font-bold transition-all duration-200
         ${disabled ? 'bg-green-400 border-green-700 text-white cursor-not-allowed' : selected ? 'bg-blue-400 border-blue-700 text-white' : 'bg-white border-gray-600 hover:bg-gray-200'}
       `}
       title={occupiedName ? `Reserved by ${occupiedName}` : `Seat ${index + 1}`}
