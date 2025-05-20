@@ -49,9 +49,9 @@ function SixSeats({ selected, setSelected, occupiedSeats }: { selected: number |
   }
 
   return (
-    <div className="flex flex-col items-center space-y-8">
-      {/* Top row of 3 seats */}
-      <div className="flex gap-12 mb-4">
+    <div className="flex flex-col items-center space-y-4 sm:space-y-8 w-full max-w-md px-4">
+      {/* Top row of seats */}
+      <div className="flex justify-center gap-4 sm:gap-12 mb-4">
         {topRow.map(i => {
           const isOccupied = occupiedSeats.some(s => s.seat === i + 1);
           const occupiedName = occupiedSeats.find(s => s.seat === i + 1)?.name;
@@ -68,18 +68,18 @@ function SixSeats({ selected, setSelected, occupiedSeats }: { selected: number |
         })}
       </div>
       {/* Lasagna image */}
-      <div className="my-4">
+      <div className="my-4 w-full flex justify-center">
         <Image
           src="/lasagna.png"
           alt="Lasagna"
           width={1.4*256}
           height={1.4*160}
-          className="rounded-xl shadow-2xl object-cover"
+          className="rounded-xl shadow-2xl object-cover w-full max-w-[358px]"
           priority
         />
       </div>
-      {/* Bottom row of 3 seats */}
-      <div className="flex gap-12 mt-4">
+      {/* Bottom row of seats */}
+      <div className="flex justify-center gap-4 sm:gap-12 mt-4">
         {bottomRow.map(i => {
           const isOccupied = occupiedSeats.some(s => s.seat === i + 1);
           const occupiedName = occupiedSeats.find(s => s.seat === i + 1)?.name;
