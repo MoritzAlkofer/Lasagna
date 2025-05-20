@@ -12,7 +12,8 @@ function Heading() {
         You are cordially invited to eat lasagna with me
       </h1>
       <p className="text-lg text-black">
-        Saturday, May 24th, 2025
+        Saturday, May 24th, 2025<br />
+        7:00 PM, Linienstr 109
       </p>
       <p className="text-lg text-black">
         Select a seat to save your name
@@ -38,8 +39,8 @@ function SeatButton({ index, selected, onClick, disabled, occupiedName }: { inde
 }
 
 function SixSeats({ selected, setSelected, occupiedSeats }: { selected: number | null, setSelected: (i: number | null) => void, occupiedSeats: { seat: number, name: string }[] }) {
-  const topRow = [0, 1, 2];
-  const bottomRow = [3, 4, 5];
+  const topRow = [0, 1, 2, 3];
+  const bottomRow = [4, 5, 6, 7];
 
   function selectSeat(index: number) {
     if (!occupiedSeats.some(s => s.seat === index + 1)) {
@@ -71,8 +72,8 @@ function SixSeats({ selected, setSelected, occupiedSeats }: { selected: number |
         <Image
           src="/lasagna.png"
           alt="Lasagna"
-          width={256}
-          height={160}
+          width={1.4*256}
+          height={1.4*160}
           className="rounded-xl shadow-2xl object-cover"
           priority
         />
